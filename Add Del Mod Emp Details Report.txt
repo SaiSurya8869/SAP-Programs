@@ -1,0 +1,94 @@
+REPORT z1015025_emp_details.
+*
+*SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME.
+
+* Designing the parameters of the employee.
+PARAMETERS: p_no    TYPE  z1015025_t_emplo-EMPLOYEE_NO,
+            p_name  TYPE  z1015025_t_emplo-EMPLOYEE_NAME,
+            p_doj   TYPE  z1015025_t_emplo-DATE_OF_JOINING,
+            p_desg  TYPE  z1015025_t_emplo-DESIGNATION,
+            p_dep   TYPE  z1015025_t_emplo-DEPARTMENT,
+            p_rep_m TYPE  z1015025_t_emplo-REPORTING_MANAGER.
+*SELECTION-SCREEN END OF BLOCK b1.
+
+*SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME.
+PARAMETERS: p_add    RADIOBUTTON GROUP rb1 USER-COMMAND ucomm,
+            p_del    RADIOBUTTON GROUP rb1,
+            p_mod    RADIOBUTTON GROUP rb1,
+            p_report RADIOBUTTON GROUP rb1.
+*SELECTION-SCREEN END OF BLOCK b2.
+
+DATA:
+* Declaring the internal table for employee.
+             it_emp TYPE TABLE OF z1015025_t_emplo,
+* Declaring the work area fo
+             wa_emp TYPE z1015025_t_emplo.
+
+
+
+IF p_add IS NOT INITIAL.
+  wa_emp-EMPLOYEE_NO        = p_no.
+  wa_emp-EMPLOYEE_NAME      = p_name.
+  wa_emp-DATE_OF_JOINING    = p_doj.
+  wa_emp-DESIGNATION        = p_desg.
+  wa_emp-DEPARTMENT         = p_dep.
+  wa_emp-REPORTING_MANAGER  = p_rep_m.
+
+* Data Transfering from work Area to internal Table.
+APPEND wa_emp TO it_emp.
+
+IF wa_emp IS NOT INITIAL.
+
+*Insert the data in to database table.
+  INSERT z1015025_t_emplo FROM TABLE it_emp.
+
+ELSE.
+
+MESSAGE 'No Data Added in DB' TYPE 'E'.
+
+ENDIF.
+
+ELSEIF p_del IS NOT INITIAL.
+  wa_emp-EMPLOYEE_NO       = p_no.
+  wa_emp-EMPLOYEE_NAME     = p_name.
+  wa_emp-DATE_OF_JOINING   = p_doj.
+  wa_emp-DESIGNATION       = p_desg.
+  wa_emp-DEPARTMENT        = p_dep.
+  wa_emp-REPORTING_MANAGER = p_rep_m.
+
+  IF wa_emp IS NOT INITIAL.
+ DELETE z1015025_t_emplo FROM wa_emp.
+ ELSE.
+   MESSAGE 'No Records Delete in DB' TYPE 'E'.
+ ENDIF.
+
+ ELSEIF p_mod IS NOT INITIAL.
+  wa_emp-EMPLOYEE_NO       = p_no.
+  wa_emp-EMPLOYEE_NAME     = p_name.
+  wa_emp-DATE_OF_JOINING   = p_doj.
+  wa_emp-DESIGNATION       = p_desg.
+  wa_emp-DEPARTMENT        = p_dep.
+  wa_emp-REPORTING_MANAGER = p_rep_m.
+
+ IF wa_emp IS NOT INITIAL.
+ MODIFY z1015025_t_emplo FROM wa_emp.
+ ELSE.
+ MESSAGE 'No Records Modify in DB' TYPE 'E'.
+ ENDIF.
+
+ELSEIF p_report IS NOT INITIAL.
+ SELECT *
+   FROM z1015025_t_emplo                          " Fetching the data from database table to internal table.
+   INTO TABLE it_emp.
+
+   LOOP AT it_emp INTO wa_emp.
+ WRITE:/ wa_emp-EMPLOYEE_NO,
+         wa_emp-EMPLOYEE_NAME,
+         wa_emp-DATE_OF_JOINING,
+         wa_emp-DESIGNATION,
+         wa_emp-DEPARTMENT,
+         wa_emp-REPORTING_MANAGER.
+
+
+   ENDLOOP.
+ENDIF.
